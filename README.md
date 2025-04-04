@@ -14,7 +14,8 @@ that's it, the `findfat` command should now be available.
 
 **scan current directory (.) for top 15 items >= 1mb (defaults: sorted by size descending)**
 ```bash
-findfat .```
+findfat .
+```
 
 **scan a specific path**
 ```bash
