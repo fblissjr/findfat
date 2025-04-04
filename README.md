@@ -2,7 +2,7 @@
 
 a simple cli tool to find what's eating your disk space on linux or macos.
 
-it scans directories recursively and shows you the biggest files and folders, sorted by size by default.
+it scans directories recursively and shows you the biggest files and folders with pretty structured outputs and sorting options
 
 ### #install
 
@@ -12,10 +12,9 @@ that's it, the `findfat` command should now be available.
 
 ### usage examples
 
-**scan current directory (.) for top 15 items >= 1mb (defaults)**
+**scan current directory (.) for top 15 items >= 1mb (defaults: sorted by size descending)**
 ```bash
-findfat .
-```
+findfat .```
 
 **scan a specific path**
 ```bash
@@ -42,37 +41,55 @@ findfat /home/user/projects -t files -m 10m
 findfat /mnt/storage -t dirs -m 1g
 ```
 
-**sort by modification time (most recent first) instead of size**
+**sort by modification time (default: ascending - oldest first)**
 ```bash
 findfat . -s mtime
 ```
 
-**sort by access time**
+**sort by modification time descending (newest first)**
+```bash
+findfat . -s mtime -d desc
+```
+
+**sort by access time (default: ascending - oldest first)**
 ```bash
 findfat . -s atime
 ```
 
+**sort by access time descending (newest first)**
+```bash
+findfat . -s atime -d desc```
+
+**sort by allocated size (default: descending - largest allocation first)**
+```bash
+findfat . -s allocated_size
+```
+
+**sort by logical size ascending (smallest first)**
+```bash
+findfat . -s size -d asc
+```
+
 **exclude node_modules and .git directories (can use multiple -e)**
 ```bash
-findfat ~/code -e node_modules -e .git -e build -e dist
-```
+findfat ~/code -e node_modules -e .git -e build -e dist```
 
 **exclude log files**
 ```bash
 findfat /var/log -e '*.log'
 ```
 
-**follow symbolic links (use carefully! might scan forever or outside target area)**
+**follow symbolic links (use carefully!)**
 ```bash
 findfat /some/path -l
 ```
 
-**output as json instead of a table (good for scripting)**
+**output as json instead of a table**
 ```bash
 findfat /tmp -m 1k -n 50 -o json
 ```
 
-**pipe json output to jq for further processing (get the single largest item)**
+**pipe json output to jq (get the single largest item)**
 ```bash
 findfat . -o json | jq '.[0]'
 ```
@@ -82,7 +99,7 @@ findfat . -o json | jq '.[0]'
 findfat /very/deep/path --no-progress
 ```
 
-**get help**
+**get help (shows all options and defaults)**
 ```bash
 findfat --help
 ```
