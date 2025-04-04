@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "findfat"
+version = "0.3.0"
+description = "A CLI tool to find large files and directories on Linux and macOS."
+author = "Fred Bliss"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Environment :: Console",
+    "Topic :: System :: Filesystems",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "rich>=10.0",
+    "structlog>=21.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/fblissjr/findfat"
+Issues = "https://github.com/fblissjr/findfat"
+
+[project.scripts]
+findfat = "findfat:main"
