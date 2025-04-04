@@ -6,7 +6,7 @@ import math
 import os
 import stat as stat_module # Avoid conflict with os.stat
 import sys
-import time
+import re
 import fnmatch
 from collections import defaultdict
 from datetime import datetime
@@ -92,30 +92,43 @@ log = structlog.get_logger("findfat")
 
 
 # --- Helper Functions ---
-# (parse_size, human_readable_size remain the same)
 def parse_size(size_str: str) -> int:
-    """Parses human-readable size string (e.g., '100M', '2G') into bytes."""
+    """Parses human-readable size string (e.g., '100M', '2G', '1.5T') into bytes."""
     size_str = size_str.strip().upper()
-    if not size_str: return 0
+    if not size_str:
+        return 0
 
-    units = {"K": 1024, "M": 1024**2, "G": 1024**3, "T": 1024**4, "P": 1024**5}
-    num_part = size_str
-    unit = ""
+    # Regex to capture the numeric part and the unit (optional)
+    # - Allows integer or decimal numbers (e.g., 100, 1.5)
+    # - Captures the unit (K, M, G, T, P) optionally followed by 'B' or 'IB'
+    match = re.match(r"^(\d+(\.\d+)?)\s*([KMGTPI]?)B?$", size_str)
+    if not match:
+        # Handle case where it's just a number (bytes)
+        if size_str.replace(".", "", 1).isdigit():
+            try:
+                return int(float(size_str))
+            except ValueError:
+                # Should not happen if isdigit passed, but safety check
+                raise ValueError(f"Invalid numeric format: {size_str!r}")
+        else:
+            raise ValueError(f"Invalid size format: {size_str!r}")
 
-    for i in range(len(size_str) - 1, -1, -1):
-        if not size_str[i].isdigit() and size_str[i] != '.':
-            num_part = size_str[:i+1]
-            unit = size_str[i+1:].replace("B", "") # Allow KB, MB etc.
-            break
-
-    unit = unit[:1] # Take first letter (K, M, G...)
+    num_part_str = match.group(1)  # The numeric part (e.g., "1", "1.5")
+    unit = match.group(3)  # The unit character (e.g., "G", "M", or "")
 
     try:
-        num = float(num_part)
-        multiplier = units.get(unit, 1)
-        return int(num * multiplier)
+        num = float(num_part_str)
     except ValueError:
-        raise ValueError(f"Invalid size format: {size_str!r}")
+        # Should be caught by regex, but safety check
+        raise ValueError(f"Invalid number format: {num_part_str!r} in {size_str!r}")
+
+    units = {"K": 1024, "M": 1024**2, "G": 1024**3, "T": 1024**4, "P": 1024**5}
+    multiplier = units.get(
+        unit, 1
+    )  # Default to 1 (bytes) if unit is empty or not found
+
+    return int(num * multiplier)
+
 
 def human_readable_size(size_bytes: int) -> str:
     """Converts bytes into human-readable string (KiB, MiB, GiB)."""
